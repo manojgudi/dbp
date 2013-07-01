@@ -1,0 +1,51 @@
+#!/usr/bin/python
+
+import serial
+import argparse
+import time
+#from ser_functions import ser_read
+
+parser = argparse.ArgumentParser(description="communication")
+
+# Auto detection of port to remove this argument
+parser.add_argument("port", help="port")
+parser.add_argument("command", help="command")
+args = parser.parse_args()
+port = args.port
+
+def ser_init(port_name, baud=115200, byte_size=serial.EIGHTBITS, stop_bits=serial.STOPBITS_ONE, time_out=3, rts_cts=True):
+	'''Initiates serial_function'''
+	try:
+		ser = serial.Serial(port = port_name,
+			baudrate=baud,bytesize=byte_size, stopbits=stop_bits,timeout=time_out, rtscts=rts_cts)
+
+		while 1:
+			ser_write(ser, "!!998877!!\n")
+			time.sleep(0.1)
+			print "inside dbp"
+			try:
+				if ser_read_once(ser) == "!!778899!!\n":
+					print "Latched"
+					break
+			except:
+				print "Could not latch"
+				pass
+		return(ser)
+	except:
+		print port+" port is busy or invalid"
+		exit()
+
+	
+def ser_write(ser_instance, data):
+	ser_instance.open()
+	ser_instance.write(data)
+	ser_instance.close()
+	
+def ser_read_once(ser_instance):
+	ser_instance.open()
+	ser_return = ser_instance.readline()
+	ser_instance.close()
+	return (ser_return)
+
+ser_instance = ser_init(port)
+ser_write(ser_instance,args.command)

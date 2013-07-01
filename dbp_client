@@ -1,0 +1,60 @@
+#!/usr/bin/python
+
+import time
+import serial
+import argparse
+
+# Importing from dbp asks all args_comments required from dbp
+#from dbp import ser_write
+#from dbp import ser_read_once
+import subprocess
+
+parser = argparse.ArgumentParser(description = "client thread")
+
+parser.add_argument("port", help="port")
+args = parser.parse_args()
+port = args.port
+
+def ser_init(port_name, baud=115200, byte_size=serial.EIGHTBITS, stop_bits=serial.STOPBITS_ONE, time_out=3, rtscts=True):
+	'''Initiates serial_function'''
+	try:
+		ser = serial.Serial(port=port_name,
+			baudrate=baud,bytesize=byte_size, stopbits=stop_bits,timeout=time_out)
+		while 1:
+			print 'hello'
+			if ser_read_once(ser) == "!!998877!!\n":
+				print "Inside"
+				ser_write(ser, "!!778899!!\n")
+				break
+
+			time.sleep(0.1)
+		return(ser)
+	except:
+		print args.port+" is Invalid"
+
+
+def ser_write(ser_instance, data):
+	ser_instance.open()
+	ser_instance.write(data)
+	ser_instance.close()
+	
+def ser_read_once(ser_instance):
+	ser_instance.open()
+	ser_return = ser_instance.readline()
+	
+	# So that buffer is cleared
+	ser_instance.flushInput()
+	ser_instance.close()
+	return (ser_return)
+
+
+def ser_exec_command(ser_instance):
+	command = str(ser_read_once(ser_instance))
+	if command == "!!998877\n!!":
+		command = str(ser_read_once(ser_instance))
+	print command
+	subprocess.Popen([command])
+	
+
+ser_instance = ser_init(port)
+ser_exec_command(ser_instance)
