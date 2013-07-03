@@ -15,6 +15,15 @@ port = args.port
 
 # change settings in /usr/lib/python2.7/dist-packages/serial/serialcli.py
 
+def list2fstr(list_data):
+	# Opposite of string.splitlines() function, list to formatted string
+	formatted_string = ""
+	for i in list_data:
+		formatted_string = formatted_string + i
+		
+	return formatted_string
+
+
 def ser_init(port_name, baud=4000000, byte_size=serial.EIGHTBITS, stop_bits=serial.STOPBITS_ONE, time_out=0.5, rts_cts=True):
 	'''Initiates serial_function'''
 	try:
@@ -53,7 +62,7 @@ def catch_command_op(ser_instance):
 	output = (ser_instance.readlines())
 	ser_instance.close()
 	print "caught command"
-	print output
+	print list2fstr(output)
 
 ser_instance = ser_init(port)
 ser_write(ser_instance,args.command)
