@@ -13,7 +13,9 @@ parser.add_argument("command", help="command")
 args = parser.parse_args()
 port = args.port
 
-def ser_init(port_name, baud=115200, byte_size=serial.EIGHTBITS, stop_bits=serial.STOPBITS_ONE, time_out=3, rts_cts=True):
+# change settings in /usr/lib/python2.7/dist-packages/serial/serialcli.py
+
+def ser_init(port_name, baud=4000000, byte_size=serial.EIGHTBITS, stop_bits=serial.STOPBITS_ONE, time_out=0.5, rts_cts=True):
 	'''Initiates serial_function'''
 	try:
 		ser = serial.Serial(port = port_name,
@@ -22,14 +24,13 @@ def ser_init(port_name, baud=115200, byte_size=serial.EIGHTBITS, stop_bits=seria
 		while 1:
 			ser_write(ser, "!!998877!!\n")
 			time.sleep(0.1)
-			print "inside dbp"
+			print "Inside while"
 			try:
 				if ser_read_once(ser) == "!!778899!!\n":
 					print "Latched"
 					break
 			except:
 				print "Could not latch"
-				pass
 		return(ser)
 	except:
 		print port+" port is busy or invalid"
@@ -47,5 +48,15 @@ def ser_read_once(ser_instance):
 	ser_instance.close()
 	return (ser_return)
 
+def catch_command_op(ser_instance):
+	ser_instance.open()
+	output = (ser_instance.readlines())
+	ser_instance.close()
+	print "caught command"
+	print output
+
 ser_instance = ser_init(port)
 ser_write(ser_instance,args.command)
+time.sleep(0.1)
+catch_command_op(ser_instance)
+
